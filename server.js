@@ -1,7 +1,7 @@
 import app from "./app.js";
 
 try {
-    await app.listen({ port: 3000 });
+    await app.listen({ port: process.env.PORT || 4000 });
 } catch (err) {
     app.log.error(err);
     process.exit(1);
