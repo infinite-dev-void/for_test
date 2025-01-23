@@ -3,12 +3,12 @@ import mysql from "@fastify/mysql";
 import cookie from "@fastify/cookie";
 
 const fastify = Fastify({
-    logger: false,
+    logger: true,
 });
 
 fastify.register(mysql, {
     promise: true,
-    connectionString: "mysql://root:159951236m_W@127.0.0.1:3306/immigration",
+    connectionString: encodeURI(process.env.DATABASE_STRING),
 });
 
 fastify.register(cookie, {

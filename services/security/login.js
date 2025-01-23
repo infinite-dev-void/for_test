@@ -42,10 +42,7 @@ export default {
             const token = await sign_refresh({ id: user.id, type: user.type });
 
             return reply
-                .setCookie("refresh_token", token, {
-                    secure: true,
-                    sameSite: "strict",
-                })
+                .setCookie("refresh_token", token, {})
                 .status(200)
                 .send();
         } catch (err) {
