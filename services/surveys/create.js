@@ -1,5 +1,11 @@
 import fastify from "./../../fastify.js";
 import { authn, authr, ADMIN, DATA_ENTRY } from "./../security/mod.js";
+import path from "node:path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default {
     /**
@@ -16,9 +22,24 @@ export default {
         }
 
         try {
+            const buffer = Buffer.from(body.passport_image.data, "base64");
+            const upload_path = path.join(__dirname, "../../public/images");
+
+            const file_name =
+                "passport_" +
+                body.immigrant_name +
+                "_" +
+                Date.now().toString() +
+                "." +
+                body.passport_image.extn;
+
+            body.passport_image = file_name;
+
+            fs.writeFileSync(upload_path + "/" + file_name, buffer);
+
             await fastify.mysql.query(
-                `INSERT INTO fms_surveys (researcher_name, interview_date, personal_consent_interview, municipality, mahalla, site_classif, pre_share, nationality, origin_city_loc, gender, age, marital_status, resident_relatives, native_lang, education_highest_level, attending_religious_school, previous_employment_status, current_employment_status, type_of_employment, income_activities_number, last_30_days_profit, profession, employment_contract_agreement, time_to_get_job, job_satisfaction_level, work_risks, way_to_get_job, leave_home_country, arrival, trip_cost, highest_cost, how_paid, travel_companions, minors_without_families, women, companions_type, travel_means, use_facilitators, facilitator_cost, migration_path, first_country, second_country, most_used_transportation, how_get_in, first_city, most_lived_city, leaving_reasons, first_leaving_reason, regular_travel_home, last_year_family_shocks, immigration_supporter, risk_awareness, forced_to_move, target_country, goal_achieving_probability, city_foreknowledge, choosing_reason, saying_express_me, other_plans, immigration_plans_intention, work_license, license_obtain_intention, have_residence, residence_obtain_intention, home_visit_plan, no_home_visit_reasons, post_migration_deportation, notes, previous_money_transfers, three_main_difficulties, living_conditions_agreement, house_nature, room_participants_number, housing_cost, eviction_threat, eviction_threat_source, eviction_threat_reason, non_food_needs, family_children, family_children_age, family_children_eductable, family_children_eductless_reasons, enough_water, water_source, water_distance, bathroom_participants_number, water_supply_continuity, health_access, not_reaching_health_reasong, public_information_reliability, intent_information_reliability) VALUES (
-                    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
+                `INSERT INTO fms_surveys (researcher_name, interview_date, personal_consent_interview, municipality, mahalla, site_classif, pre_share, immigrant_name, passport_no, passport_image, nationality, origin_city_loc, gender, age, marital_status, wife_name, children_num, resident_relatives, native_lang, education_highest_level, attending_religious_school, previous_employment_status, current_employment_status, type_of_employment, income_activities_number, last_30_days_profit, profession, employment_contract_agreement, time_to_get_job, job_satisfaction_level, work_risks, way_to_get_job, leave_home_country, arrival, trip_cost, highest_cost, how_paid, travel_companions, minors_without_families, women, companions_type, travel_means, use_facilitators, facilitator_cost, migration_path, first_country, second_country, most_used_transportation, how_get_in, first_city, most_lived_city, leaving_reasons, first_leaving_reason, regular_travel_home, last_year_family_shocks, immigration_supporter, risk_awareness, forced_to_move, target_country, goal_achieving_probability, city_foreknowledge, choosing_reason, saying_express_me, other_plans, immigration_plans_intention, work_license, license_obtain_intention, have_residence, residence_obtain_intention, home_visit_plan, no_home_visit_reasons, post_migration_deportation, notes, previous_money_transfers, three_main_difficulties, living_conditions_agreement, house_nature, room_participants_number, housing_cost, non_food_needs, family_children, family_children_age, family_children_eductable, family_children_eductless_reasons, enough_water, water_source, water_distance, bathroom_participants_number, water_supply_continuity, health_access, not_reaching_health_reasong, public_information_reliability, intent_information_reliability) VALUES (
+                    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`,
                 [
                     body.researcher_name,
                     body.interview_date,
@@ -27,11 +48,16 @@ export default {
                     body.mahalla,
                     body.site_classif,
                     body.pre_share,
+                    body.immigrant_name,
+                    body.passport_no,
+                    body.passport_image,
                     body.nationality,
                     body.origin_city_loc,
                     body.gender,
                     body.age,
                     body.marital_status,
+                    body.wife_name,
+                    body.children_num,
                     body.resident_relatives,
                     body.native_lang,
                     body.education_highest_level,
@@ -94,9 +120,9 @@ export default {
                     body.house_nature,
                     body.room_participants_number,
                     body.housing_cost,
-                    body.eviction_threat,
+                    /* body.eviction_threat,
                     body.eviction_threat_source,
-                    body.eviction_threat_reason,
+                    body.eviction_threat_reason, */
                     body.non_food_needs,
                     body.family_children,
                     body.family_children_age,
@@ -160,6 +186,38 @@ function validate_body(body) {
     if (typeof body.pre_share != "number") {
         return "يرجى تحديد خيار المشاركة المسبقة";
     }
+
+    if (typeof body.immigrant_name != "string") {
+        return "يرجى تعبئة حقل اسم المهاجر";
+    }
+
+    if (typeof body.passport_no != "string") {
+        return "يرجى تعبئة حقل رقم جواز السفر";
+    }
+
+    if (typeof body.passport_image != "object") {
+        return "يرجى ارفاق صورة جواز السفر";
+    }
+
+    const f_type = body.passport_image.type;
+    if (typeof f_type != "string") {
+        return "يرجى ارفاق صورة جواز السفر";
+    }
+
+    if (!f_type.startsWith("image")) {
+        return "يجب أن يكون الملف عبارة عن صورة";
+    }
+
+    const extn = f_type.split("/")[1];
+
+    if (!["png", "jpg", "jpeg"].includes(extn)) {
+        return "يجب أن تكون الصورة بامتداد: png أو jpg أو jpeg";
+    }
+
+    if (typeof body.passport_image.data != "string") {
+        return "يرجى ارفاق صورة جواز السفر";
+    }
+
     if (typeof body.nationality != "string" || body.nationality === "") {
         return "يرجى تعبئة حقل الجنسية";
     }
@@ -361,9 +419,9 @@ function validate_body(body) {
     if (typeof body.housing_cost != "number") {
         return "يرجى تعبئة حقل تكلفة المسكن الشهرية";
     }
-    if (typeof body.eviction_threat != "number") {
+    /* if (typeof body.eviction_threat != "number") {
         return "يرجى تجديد ما إذا تم تهديدك";
-    }
+    } */
     if (typeof body.non_food_needs != "string" || body.non_food_needs === "") {
         return "يرجى تحديد المواد الغير غذائية العاجلة";
     }
@@ -395,4 +453,6 @@ function validate_body(body) {
     if (typeof body.intent_information_reliability != "number") {
         return "يرجى تحديد مصداقية النوايا";
     }
+
+    body.passport_image.extn = extn;
 }

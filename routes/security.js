@@ -2,14 +2,21 @@ import fastify from "./../fastify.js";
 import { login, access_token } from "./../services/security/mod.js";
 import fs from "fs/promises";
 
+const JS = "index-DjW64imO.js";
+const CSS = "index-dVhm-skk.css";
+const LOGO = "logo-HcJLlxQn.jpg";
+const LOGO_NO_BG = "logo-no-bg-CExad3Yc.png";
+const FONT = "CAREEM-REGULAR.DB5F2BCA26992ED25A89-Bo5166ej.otf";
+
 export default function () {
     fastify.post("/login", login.opts, login.handler);
     fastify.post("/access_token", access_token.opts, access_token.handler);
 
     fastify.get("/", login_page);
-    fastify.get("/assets/index-CTKz2vs9.js", js);
-    fastify.get("/assets/index-C3wx9wvO.css", css);
-    fastify.get("/assets/logo-HcJLlxQn.jpg", logo);
+    fastify.get(`/assets/${JS}`, js);
+    fastify.get(`/assets/${CSS}`, css);
+    fastify.get(`/assets/${LOGO}`, logo);
+    fastify.get(`/assets/${LOGO_NO_BG}`, logo_no_bg);
     fastify.get(
         "/assets/CAREEM-REGULAR.DB5F2BCA26992ED25A89-Bo5166ej.otf",
         font
@@ -38,7 +45,7 @@ async function login_page(req, reply) {
 
 async function js(req, reply) {
     try {
-        const stream = await fs.readFile("dist/assets/index-CTKz2vs9.js");
+        const stream = await fs.readFile(`dist/assets/${JS}`);
         return reply.type("text/javascript").send(stream);
     } catch (err) {
         fastify.log.error(err);
@@ -54,7 +61,7 @@ async function js(req, reply) {
 
 async function css(req, reply) {
     try {
-        const stream = await fs.readFile("dist/assets/index-C3wx9wvO.css");
+        const stream = await fs.readFile(`dist/assets/${CSS}`);
         return reply.type("text/css").send(stream);
     } catch (err) {
         fastify.log.error(err);
@@ -70,7 +77,23 @@ async function css(req, reply) {
 
 async function logo(req, reply) {
     try {
-        const stream = await fs.readFile("dist/assets/logo-HcJLlxQn.jpg");
+        const stream = await fs.readFile(`dist/assets/${LOGO}`);
+        return reply.type("image/jpeg").send(stream);
+    } catch (err) {
+        fastify.log.error(err);
+        return reply.status(500).send({
+            message: "حدث خطأ داخلي في الخادم",
+        });
+    }
+}
+
+/**
+ * @type {import("fastify").RouteHandlerMethod}
+ */
+
+async function logo_no_bg(req, reply) {
+    try {
+        const stream = await fs.readFile(`dist/assets/${LOGO_NO_BG}`);
         return reply.type("image/jpeg").send(stream);
     } catch (err) {
         fastify.log.error(err);
@@ -86,9 +109,7 @@ async function logo(req, reply) {
 
 async function font(req, reply) {
     try {
-        const stream = await fs.readFile(
-            "dist/assets/CAREEM-REGULAR.DB5F2BCA26992ED25A89-Bo5166ej.otf"
-        );
+        const stream = await fs.readFile(`dist/assets/${FONT}`);
         return reply.type("font/otf").send(stream);
     } catch (err) {
         fastify.log.error(err);

@@ -1,4 +1,5 @@
 import app from "./app.js";
+import { create_connection, send_mail } from "./services/email/handler.js";
 
 const port = process.env.PORT || 4000;
 try {
@@ -10,6 +11,14 @@ try {
     app.log.error(err);
     process.exit(1);
 }
+
+create_connection();
+
+send_mail(
+    "walidalayash99@gmail.com",
+    "اختبار إرسال البريد",
+    "<h1>هل وصلك البريد الإلكتروني</h1><p>يرجى عدم الرد على هذا البريد</p>"
+);
 
 /* fastify.get("/", async function (request, reply) {
     return { hello: "world" };
