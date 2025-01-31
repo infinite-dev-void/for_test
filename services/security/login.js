@@ -1,7 +1,9 @@
 import argon2 from "argon2";
 
 import fastify from "./../../fastify.js";
-import { sign_refresh } from "./../../utils/jwt.js";
+import { sign_vcode } from "./../../utils/jwt.js";
+import { new_vcode } from "./v_code.js";
+import { send_mail } from "./../email/handler.js";
 
 export default {
     /**
@@ -39,12 +41,25 @@ export default {
                 });
             }
 
-            const token = await sign_refresh({ id: user.id, type: user.type });
+            const vcode = new_vcode(user.id);
 
-            return reply
-                .setCookie("refresh_token", token, {})
-                .status(200)
-                .send();
+            await send_mail(
+                body.user_name,
+                "رمز التحقق",
+                `<div style="width:100%; text-align: center;">
+                <h2>استخدم هذا الرمز لاتمام عملية تسجيل الدخول</h2>
+                <p>${vcode}</p>
+                </div>`
+            );
+
+            const token = await sign_vcode({
+                id: user.id,
+                type: user.type,
+            });
+
+            return reply.status(200).send({
+                vcode_token: token,
+            });
         } catch (err) {
             fastify.log.error(err);
             return reply.status(500).send({

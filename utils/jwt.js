@@ -7,6 +7,7 @@ const verify = promisify(jwt.verify);
 
 const REFRESH = 1;
 const ACCESS = 2;
+const VCODE = 3;
 
 export async function sign_refresh(payload) {
     return await sign(
@@ -57,6 +58,33 @@ export async function verify_access(token) {
         throw {
             status_code: 400,
             message: "رمز الوصول غير صالح",
+        };
+    }
+    return payload;
+}
+
+export async function sign_vcode(payload) {
+    return await sign(
+        { ...payload, iat: Date.now(), token_type: VCODE },
+        process.env.JWT_SECRET || "secret"
+    );
+}
+
+export async function verify_vcode(token) {
+    const payload = await verify(
+        token,
+        process.env.JWT_SECRET || "secret"
+    ).catch((err) => {
+        throw {
+            status_code: 500,
+            message: "حدث خطأ في الخادم",
+            err,
+        };
+    });
+    if (payload.token_type !== VCODE) {
+        throw {
+            status_code: 400,
+            message: "رمز التحقق غير صالح",
         };
     }
     return payload;

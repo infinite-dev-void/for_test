@@ -24,8 +24,8 @@ const runDeleter = () => {
                 vCodes
             )) {
                 if (
-                    (count == 1 && now > lastVCode + 3600000) ||
-                    now > lastVCode + 86400000
+                    (count == 1 && now > lastVCode + 1000 * 60 * 60) ||
+                    now > lastVCode + 1000 * 60 * 5
                 ) {
                     delete vCodes[email];
                     len--;
@@ -41,10 +41,10 @@ const runDeleter = () => {
 
 export function new_vcode(email) {
     let foundEmail = vCodes[email];
-    console.log(foundEmail);
+
     if (foundEmail) {
         if (foundEmail.count > 5) {
-            if (Date.now() < foundEmail.lastVCode + 86400000) {
+            if (Date.now() < foundEmail.lastVCode + 1000 * 60 * 5) {
                 throw "لقد بلغت الحد الأقصى لعدد رموز التحقق يرجى المحاولة لاحقا";
             } else {
                 foundEmail.count = 0;
@@ -66,11 +66,11 @@ export function new_vcode(email) {
 export function verify(email, vCode) {
     const foundEmail = vCodes[email];
     if (!foundEmail) {
-        throw { field: "email", error: "لم يتم إرسال رمز تحقق لهذا البريد" };
+        return { field: "email", error: "لم يتم إرسال رمز تحقق للبريد" };
     }
 
     if (foundEmail.verified > 15) {
-        throw {
+        return {
             field: "vCode",
             error: "لقد استنفدت جميع المحاولات يرجى طلب رمز جديد",
         };
@@ -78,7 +78,7 @@ export function verify(email, vCode) {
 
     if (foundEmail.vCode != vCode) {
         foundEmail.verified++;
-        throw {
+        return {
             field: "vCode",
             error: "رمز التحقق غير صحيح",
         };

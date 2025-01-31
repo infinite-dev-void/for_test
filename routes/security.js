@@ -1,15 +1,16 @@
 import fastify from "./../fastify.js";
-import { login, access_token } from "./../services/security/mod.js";
+import { login, access_token, login2 } from "./../services/security/mod.js";
 import fs from "fs/promises";
 
-const JS = "index-DjW64imO.js";
-const CSS = "index-dVhm-skk.css";
+const JS = "index-8r5oXDsx.js";
+const CSS = "index-BnHi4oA8.css";
 const LOGO = "logo-HcJLlxQn.jpg";
 const LOGO_NO_BG = "logo-no-bg-CExad3Yc.png";
 const FONT = "CAREEM-REGULAR.DB5F2BCA26992ED25A89-Bo5166ej.otf";
 
 export default function () {
     fastify.post("/login", login.opts, login.handler);
+    fastify.post("/login2", login2.opts, login2.handler);
     fastify.post("/access_token", access_token.opts, access_token.handler);
 
     fastify.get("/", login_page);
