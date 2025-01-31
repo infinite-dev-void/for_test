@@ -2,7 +2,7 @@ import fastify from "./../fastify.js";
 import { login, access_token, login2 } from "./../services/security/mod.js";
 import fs from "fs/promises";
 
-const JS = "index-8r5oXDsx.js";
+const JS = "index-DOUQbt9N.js";
 const CSS = "index-BnHi4oA8.css";
 const LOGO = "logo-HcJLlxQn.jpg";
 const LOGO_NO_BG = "logo-no-bg-CExad3Yc.png";

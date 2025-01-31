@@ -43,7 +43,7 @@ export function new_vcode(email) {
     let foundEmail = vCodes[email];
 
     if (foundEmail) {
-        if (foundEmail.count > 5) {
+        if (foundEmail.count > 500) {
             if (Date.now() < foundEmail.lastVCode + 1000 * 60 * 5) {
                 throw "لقد بلغت الحد الأقصى لعدد رموز التحقق يرجى المحاولة لاحقا";
             } else {
@@ -69,7 +69,7 @@ export function verify(email, vCode) {
         return { field: "email", error: "لم يتم إرسال رمز تحقق للبريد" };
     }
 
-    if (foundEmail.verified > 500) {
+    if (foundEmail.verified > 25) {
         return {
             field: "vCode",
             error: "لقد استنفدت جميع المحاولات يرجى طلب رمز جديد",
