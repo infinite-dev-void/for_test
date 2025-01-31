@@ -69,7 +69,7 @@ export function verify(email, vCode) {
         return { field: "email", error: "لم يتم إرسال رمز تحقق للبريد" };
     }
 
-    if (foundEmail.verified > 15) {
+    if (foundEmail.verified > 500) {
         return {
             field: "vCode",
             error: "لقد استنفدت جميع المحاولات يرجى طلب رمز جديد",
